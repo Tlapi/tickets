@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="YourProject.com" default="deploy">
+
+    <property name="productionDir" value="yourproject.com" />
+    <property name="staggingDir" value="tst.yourproject.com" />
+
+    <property name="host" value="yourprojecthost" />
+    <property name="hostpass" value="yourprojecthostpassword" />
+
+    <property name="currentBranch" value="" />
+    <property name="deployBranch" value="" />
+
+    <property environment="env" />
+
+    <exec outputProperty="currentBranch" command="git rev-parse --abbrev-ref HEAD" />
+
+    <!-- ============================================  -->
+    <!-- Target: init                               -->
+    <!-- ============================================  -->
+    <target name="init" description="inits project">
+        <echo msg="Project init" />
+    </target>
+
+    <!-- ============================================  -->
+    <!-- Target: deploy                               -->
+    <!-- ============================================  -->
+    <target name="deploy" description="deploys project to remote webserver" depends="init">
+
+        <input propertyname="deployTarget" defaultValue="develop" promptChar="?">What do you want to deploy? (develop/master/current)</input>
+
+        <if>
+            <equals arg1="${deployTarget}" arg2="master" />
+            <then>
+                <property name="deployDir" value="${productionDir}" override="true" />
+                <property name="deployBranch" value="master" override="true" />
+            </then>
+            <else>
+                <property name="deployDir" value="${staggingDir}" override="true" />
+                <if>
+                    <equals arg1="${deployTarget}" arg2="current" />
+                    <then>
+                        <property name="deployBranch" value="${currentBranch}" override="true" />
+                    </then>
+                    <else>
+                        <property name="deployBranch" value="develop" override="true" />
+                    </else>
+                </if>
+            </else>
+        </if>
+
+        <echo msg="Connecting to yourprojecthost ${deployDir}" />
+        <echo msg="Deploy branch: ${deployBranch}" />
+		<ssh username="mfcc" password="${hostpass}" host="${host}" command="cd /domains/${deployDir}/public &amp;&amp; git fetch &amp;&amp; git checkout ${deployBranch} &amp;&amp; git pull origin ${deployBranch}" />
+    </target>
+
+    <!-- ============================================  -->
+    <!-- Target: apply hotfix                               -->
+    <!-- ============================================  -->
+    <target name="applyhotfix" description="deploys hotfix to remote webserver and pushes to remote git">
+
+        <echo msg="Pushing develop to origin" />
+        <exec command="git checkout develop" dir="." passthru="true"/>
+        <exec command="git push origin develop" dir="." passthru="true"/>
+
+        <echo msg="Pushing master to origin" />
+        <exec command="git checkout master" dir="." passthru="true"/>
+        <exec command="git push origin master" dir="." passthru="true"/>
+
+        <echo msg="Connecting to yourprojecthost" />
+
+        <echo msg="Deploy branch master to ${productionDir}" />
+        <ssh username="mfcc" password="${hostpass}" host="${host}" command="cd /domains/${productionDir}/public &amp;&amp; git fetch &amp;&amp; git checkout master &amp;&amp; git pull origin master" />
+
+        <echo msg="Deploy branch develop to ${staggingDir}" />
+        <ssh username="mfcc" password="${hostpass}" host="${host}" command="cd /domains/${staggingDir}/public &amp;&amp; git fetch &amp;&amp; git checkout develop &amp;&amp; git pull origin develop" />
+
+    </target>
+
+</project>

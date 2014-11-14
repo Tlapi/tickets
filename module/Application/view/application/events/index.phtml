@@ -1,0 +1,49 @@
+<div class="jumbotron">
+    <h1><?php echo $this->translate('Events') ?></h1>
+</div>
+
+<div class="row">
+
+    <div class="col-md-4">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3 class="panel-title"><?php echo $this->translate('New tickets') ?></h3>
+            </div>
+            <div class="panel-body">
+
+                <ul>
+                    <?php foreach($this->tickets as $ticket){?>
+                        <li><a href="<?php echo $this->url('tickets/detail', array('id' => $ticket->getId()))?>">TICKET</a> <a href="<?php echo $this->url('tickets/detail', array('id' => $ticket->getId()))?>" class="btn btn-primary btn-xs"><?php echo $this->translate('BUY TICKET') ?></a></li>
+                    <?php }?>
+                </ul>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3 class="panel-title"><?php echo $this->translate('Closest') ?></h3>
+            </div>
+            <div class="panel-body">
+                <ul>
+                    <?php foreach($this->events as $event){?>
+                        <li><a href="#"><?php echo $event->title?></a></li>
+                    <?php }?>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3 class="panel-title"><?php echo $this->translate('Past') ?></h3>
+            </div>
+            <div class="panel-body">
+
+            </div>
+        </div>
+    </div>
+</div>
